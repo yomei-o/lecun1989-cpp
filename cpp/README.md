@@ -1,5 +1,7 @@
 # lecun1989-repro — C/C++ port
 
+*[日本語版 README はこちら → `README.ja.md`](README.ja.md)*
+
 A dependency-free **standard C++17** port of Andrej Karpathy's reproduction of
 Yann LeCun et al. 1989,
 [Backpropagation Applied to Handwritten Zip Code Recognition](http://yann.lecun.com/exdb/publis/pdf/lecun-89e.pdf)
