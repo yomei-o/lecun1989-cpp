@@ -15,10 +15,17 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
 endif()
 
+# Trainer / evaluator (self-contained, no third-party deps).
 add_executable(lecun1989 lecun1989.cpp)
 
-if(MSVC)
-    target_compile_options(lecun1989 PRIVATE /O2)
-else()
-    target_compile_options(lecun1989 PRIVATE -O2)
-endif()
+# Image classifier: loads a saved model and predicts the digit in an image.
+# stb_image / stb_image_resize2 implementations live in stb_impl.cpp.
+add_executable(predict predict.cpp stb_impl.cpp)
+
+foreach(tgt lecun1989 predict)
+    if(MSVC)
+        target_compile_options(${tgt} PRIVATE /O2)
+    else()
+        target_compile_options(${tgt} PRIVATE -O2)
+    endif()
+endforeach()

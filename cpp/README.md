@@ -38,9 +38,10 @@ Open the **x64 Native Tools Command Prompt for VS 2022**:
 
 ```bat
 cl /O2 /EHsc /std:c++17 lecun1989.cpp
+cl /O2 /EHsc /std:c++17 predict.cpp stb_impl.cpp
 ```
 
-### C. CMake (any compiler)
+### C. CMake (any compiler) — builds both `lecun1989` and `predict`
 
 ```bash
 cmake -S . -B build
@@ -51,8 +52,8 @@ cmake --build build --config Release
 
 ```bash
 g++ -O2 -std=c++17 -o lecun1989 lecun1989.cpp
-# or
-clang++ -O2 -std=c++17 -o lecun1989 lecun1989.cpp
+g++ -O2 -std=c++17 -o predict  predict.cpp stb_impl.cpp
+# (swap g++ for clang++ if you prefer)
 ```
 
 ---
@@ -170,7 +171,52 @@ lecun1989 eval data --load model.bin
 
 ---
 
-## 6. Learning-rate sweep
+## 6. Recognise a digit from an image file
+
+`predict` loads a model saved with `--save` and classifies a single handwritten
+digit in an ordinary image (PNG / JPG / BMP / …). Image loading uses
+[`stb_image`](https://github.com/nothings/stb) and the 16×16 downscale uses
+`stb_image_resize2` (both header-only, already vendored in this folder; their
+implementations are compiled once in `stb_impl.cpp`).
+
+```
+predict <image> [--model FILE] [--invert|--no-invert] [--no-center]
+```
+
+| option | meaning |
+|---|---|
+| `<image>` | path to the digit image (any format stb_image reads) |
+| `--model FILE` | model file to load (default `model.bin`) |
+| `--invert` / `--no-invert` | force / disable colour inversion (default: auto) |
+| `--no-center` | skip bounding-box crop + centering; just scale to 16×16 |
+
+The net was trained MNIST-style — a **bright digit on a dark background**. A
+photo or scan of pen-on-paper is the opposite (dark ink, light paper), so by
+default `predict` auto-inverts when the image border is light. It also crops to
+the digit's bounding box and re-centers it with an MNIST-like margin, which makes
+real-world snapshots far more robust. Use `--invert` / `--no-invert` to override
+the auto-detection.
+
+```
+> predict 2ni.png --model model.bin
+loaded model 'model.bin' and image '2ni.png' (100x100, 4 channel(s))
+colour inversion: on (auto)
+
+  predicted digit: 2
+
+  per-class scores (tanh output, higher = more likely):
+    2: +0.9964  ########################################  <-- prediction
+    3: -0.9871
+    ...
+```
+
+Tips for best accuracy: use a reasonably centered, single digit with good
+contrast. The 1989 net is tiny (16×16 input, 9760 params) and was trained on
+downscaled MNIST, so very stylised handwriting or noisy backgrounds can trip it.
+
+---
+
+## 7. Learning-rate sweep
 
 The paper never states the learning rate; the original notes mention a manual
 sweep. This mode trains one fresh net per learning rate (from an identical
@@ -220,3 +266,14 @@ best learning rate: 0.03 (test error ...%)
 | `lecun1989 train [dir] [lr] [--epochs N] [--save FILE]` | Train, optionally save weights |
 | `lecun1989 eval [dir] --load FILE` | Load a model and report test error |
 | `lecun1989 sweep [dir] [--epochs N] [lrs...]` | Compare learning rates, report the best |
+| `predict <image> [--model FILE] [--invert\|--no-invert] [--no-center]` | Recognise the digit in an image file |
+
+## Files
+
+| File | Purpose |
+|---|---|
+| `lecun_net.h` | The network (dims, connectivity, forward/backward, SGD, model save/load) — shared |
+| `lecun1989.cpp` | Trainer / evaluator CLI (`gradcheck`, `train`, `eval`, `sweep`) |
+| `predict.cpp` | Standalone image classifier |
+| `stb_image.h`, `stb_image_resize2.h`, `stb_impl.cpp` | Vendored stb libraries for `predict` |
+| `CMakeLists.txt` | Builds both `lecun1989` and `predict` |

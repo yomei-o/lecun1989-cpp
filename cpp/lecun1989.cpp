@@ -42,6 +42,11 @@
 #include <algorithm>
 #include <numeric>
 
+// The network itself (dimensions, connectivity, Net struct, save/load) lives in
+// a shared header so the trainer and the image classifier stay in lock-step.
+#include "lecun_net.h"
+
+#if 0  // ---- moved to lecun_net.h ----
 // ===========================================================================
 //  Network dimensions (see repro.py for the derivation of every number)
 // ===========================================================================
@@ -345,6 +350,7 @@ struct Net {
         return (bool)f;
     }
 };
+#endif // ---- moved to lecun_net.h ----
 
 // ===========================================================================
 //  Gradient check -- verifies backward() against numerical gradients.

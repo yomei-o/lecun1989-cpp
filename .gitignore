@@ -1,0 +1,14 @@
+# build artifacts
+*.exe
+*.obj
+*.o
+cpp/build/
+build/
+
+# trained model (regenerate with: lecun1989 train ... --save model.bin)
+model.bin
+cpp/model.bin
+
+# MNIST data (download with cpp/get_mnist.ps1)
+data/
+cpp/data/
