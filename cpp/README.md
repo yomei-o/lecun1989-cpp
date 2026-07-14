@@ -190,6 +190,10 @@ predict <image> [--model FILE] [--invert|--no-invert] [--no-center]
 | `--invert` / `--no-invert` | force / disable colour inversion (default: auto) |
 | `--no-center` | skip bounding-box crop + centering; just scale to 16×16 |
 
+A ready-to-use **pre-trained model is included** in this folder as `model.bin`
+(23 epochs, ~4.5% MNIST test error), so you can run `predict` right away without
+training. Retrain your own with `lecun1989 train ... --save model.bin` any time.
+
 The net was trained MNIST-style — a **bright digit on a dark background**. A
 photo or scan of pen-on-paper is the opposite (dark ink, light paper), so by
 default `predict` auto-inverts when the image border is light. It also crops to
